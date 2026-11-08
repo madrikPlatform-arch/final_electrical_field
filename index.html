@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>المجالات الكهربائية وقانون جاوس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- MathJax: \( ... \) و $ ... $ -->
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]'], ['$$', '$$']] },
+    options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+  :root {
+    --primary-blue: #1e3a8a;
+    --blue-600: #2563eb;
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --ok: #16a34a;
+    --ok-bg: #dcfce7;
+    --bad: #dc2626;
+    --bad-bg: #fee2e2;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
+    background: linear-gradient(180deg, #e0f2fe 0%, var(--bg) 260px);
+    color: var(--text);
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+  .container { max-width: 820px; margin: 0 auto; padding: 16px 14px 48px; }
+
+  /* ---------- Header ---------- */
+  .site-header {
+    background: linear-gradient(135deg, var(--primary-blue), var(--teal));
+    color: #fff;
+    border-radius: 18px;
+    padding: 22px 18px;
+    text-align: center;
+    box-shadow: 0 10px 24px rgba(30, 58, 138, .25);
+    margin-bottom: 18px;
+  }
+  .site-header h1 { margin: 0 0 4px; font-size: 1.7rem; font-weight: 800; }
+  .site-header p { margin: 0; opacity: .92; font-size: .95rem; }
+
+  /* ---------- Cards ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 16px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, .05);
+  }
+  .hidden { display: none !important; }
+
+  /* ---------- Login ---------- */
+  #login-section { max-width: 440px; margin: 28px auto 0; text-align: center; }
+  #login-section h2 { margin: 0 0 6px; color: var(--primary-blue); font-size: 1.3rem; }
+  #login-section p.sub { margin: 0 0 18px; color: var(--muted); font-size: .92rem; }
+  .field {
+    width: 100%;
+    padding: 13px 14px;
+    font: inherit;
+    font-size: 1.1rem;
+    text-align: center;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    background: #f8fafc;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field:focus { border-color: var(--blue-600); box-shadow: 0 0 0 4px rgba(37, 99, 235, .12); background: #fff; }
+  .btn {
+    display: inline-block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px 16px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary-blue), var(--blue-600));
+    border: 0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform .08s, opacity .15s;
+  }
+  .btn:active { transform: scale(.985); }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
+  .btn.teal { background: linear-gradient(135deg, var(--teal-dark), var(--teal)); }
+  #login-error { color: var(--bad); font-weight: 700; min-height: 1.6em; margin-top: 12px; }
+
+  /* ---------- Exam top bar ---------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, .96);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, .08);
+  }
+  #welcome { font-weight: 700; color: var(--primary-blue); font-size: 1rem; }
+  .timer {
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    color: var(--teal-dark);
+    background: #ccfbf1;
+    padding: 4px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .progress { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; margin: -4px 4px 14px; }
+  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--teal), var(--blue-600)); transition: width .25s; }
+
+  /* ---------- Result banner ---------- */
+  #result-banner {
+    text-align: center;
+    color: #fff;
+    border-radius: 18px;
+    padding: 22px 16px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--teal));
+    box-shadow: 0 10px 24px rgba(30, 58, 138, .25);
+  }
+  #result-banner .label { opacity: .9; font-size: .95rem; }
+  #result-banner .score { font-size: 2.6rem; font-weight: 800; line-height: 1.3; direction: ltr; }
+  #result-banner .pct { font-size: 1.05rem; font-weight: 700; }
+  #sync-status { margin-top: 10px; font-size: .92rem; background: rgba(255,255,255,.18); display: inline-block; padding: 4px 14px; border-radius: 99px; }
+  #retry-btn { margin-top: 10px; width: auto; padding: 8px 18px; font-size: .95rem; background: #fff; color: var(--primary-blue); }
+
+  /* ---------- Questions ---------- */
+  .q-card { margin-bottom: 14px; scroll-margin-top: 80px; }
+  .q-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .q-num {
+    flex: none;
+    background: var(--primary-blue);
+    color: #fff;
+    font-weight: 800;
+    font-size: .85rem;
+    padding: 2px 12px;
+    border-radius: 99px;
+  }
+  .q-text { font-weight: 600; font-size: 1.03rem; }
+  .stmts { margin-top: 8px; font-weight: 400; display: grid; gap: 4px; }
+  .stmts b { color: var(--primary-blue); }
+  .q-img-wrap { text-align: center; margin: 10px 0 12px; }
+  .q-img-wrap img {
+    max-width: 100%;
+    max-height: 340px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: zoom-in;
+  }
+  .options { display: grid; gap: 8px; margin-top: 8px; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: border-color .12s, background .12s;
+  }
+  .opt:hover { border-color: #93c5fd; }
+  .opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .opt .letter {
+    flex: none;
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: var(--primary-blue);
+    font-weight: 800;
+    font-size: .9rem;
+  }
+  .opt .otext { flex: 1; min-width: 0; overflow-x: auto; overflow-y: hidden; }
+  .opt .optimg { text-align: center; }
+  .opt .optimg img {
+    max-width: 100%;
+    max-height: 150px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .opt .missing { color: var(--muted); font-size: .85rem; }
+  .opt:has(input:checked) { border-color: var(--blue-600); background: #eff6ff; }
+  .opt:has(input:checked) .letter { background: var(--blue-600); color: #fff; }
+  .opt:has(input:focus-visible) { outline: 3px solid rgba(37, 99, 235, .35); }
+
+  .q-card.locked .opt { cursor: default; }
+  .q-card.locked .opt:hover { border-color: var(--border); }
+  .opt.correct { border-color: var(--ok) !important; background: var(--ok-bg) !important; }
+  .opt.correct .letter { background: var(--ok) !important; color: #fff !important; }
+  .opt.wrong { border-color: var(--bad) !important; background: var(--bad-bg) !important; }
+  .opt.wrong .letter { background: var(--bad) !important; color: #fff !important; }
+
+  .feedback { margin-top: 12px; padding: 10px 12px; border-radius: 12px; font-size: .95rem; }
+  .feedback.ok { background: var(--ok-bg); color: #14532d; }
+  .feedback.bad { background: var(--bad-bg); color: #7f1d1d; }
+  .feedback .fb-title { font-weight: 800; margin-bottom: 2px; }
+  .feedback .fb-explain { color: var(--text); }
+
+  .submit-wrap { margin-top: 8px; }
+  #submit-msg { text-align: center; color: var(--muted); margin-top: 8px; min-height: 1.5em; font-size: .92rem; }
+
+  mjx-container { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+
+  /* ---------- Lightbox ---------- */
+  #lightbox {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(15, 23, 42, .88);
+    display: none; align-items: center; justify-content: center;
+    padding: 16px; cursor: zoom-out;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img { max-width: 100%; max-height: 100%; border-radius: 10px; background: #fff; }
+
+  footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 26px; }
+
+  @media (min-width: 640px) {
+    .site-header h1 { font-size: 2.1rem; }
+    .card { padding: 24px 24px; }
+    .q-text { font-size: 1.1rem; }
+    .options.grid-img { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="site-header">
+    <h1>المجالات الكهربائية وقانون جاوس</h1>
+    <p id="meta-line"></p>
+  </header>
+
+  <!-- ===================== تسجيل الدخول ===================== -->
+  <section id="login-section" class="card">
+    <h2>تسجيل الدخول للامتحان</h2>
+    <p class="sub">أدخل كود الطالب الخاص بك للبدء</p>
+    <input id="student-id" class="field" type="text" inputmode="numeric" autocomplete="off"
+           placeholder="كود الطالب (مثال: 18)" aria-label="كود الطالب">
+    <button id="login-btn" class="btn">تحقق ودخول</button>
+    <div id="login-error" role="alert"></div>
+  </section>
+
+  <!-- ===================== الامتحان ===================== -->
+  <section id="exam-section" class="hidden">
+    <div class="topbar">
+      <div id="welcome"></div>
+      <div class="timer" id="timer">00:00</div>
+    </div>
+    <div class="progress"><div id="progress-bar"></div></div>
+
+    <div id="result-banner" class="hidden"></div>
+
+    <div id="questions"></div>
+
+    <div class="submit-wrap">
+      <button id="submit-btn" class="btn teal">إنهاء الامتحان وإرسال النتيجة</button>
+      <div id="submit-msg"></div>
+    </div>
+  </section>
+
+  <footer>المجالات الكهربائية وقانون جاوس • بالتوفيق للجميع</footer>
+</div>
+
+<div id="lightbox" aria-hidden="true"><img alt=""></div>
+
+<script>
+/* =====================================================================
+   الإعدادات
+   ===================================================================== */
+const EXAM_META = {
+  subject: "فيزياء",
+  module: "الكهروستاتيكية",
+  lesson: "اختبار على حالات خاصة في تماثل توزيع الشحنات (2.9)",
+  type: "اختبار"
+};
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzSAFcPEXqQfaFu4P2x1XTgBNsWb_V7OA9AjW_5HBfKB17nL_YcY4iE58AH3bObx5k/exec";
+
+/* الصور داخل مجلد img — اسم الملف = رقم السؤال (مثل img/5.jpg)
+   وصور الخيارات: img/4a.png ، img/4b.png ، img/4c.png ، img/4d.png            */
+const IMG_DIR = "img";
+const IMG_EXTS = ["png", "jpg", "jpeg", "webp", "gif", "svg", "PNG", "JPG", "JPEG", "WEBP"];
+
+/* =====================================================================
+   بنك الأسئلة
+   img     = اسم ملف الشكل الرئيسي (بدون امتداد)
+   optImgs = أسماء ملفات صور الخيارات (إن كانت الخيارات صوراً)
+   tag     = نقطة الضعف التي تُسجَّل عند الخطأ
+   ===================================================================== */
+const QUESTIONS = [
+  {
+    label: "1", img: null, tag: "المجال الناتج عن سلك لا نهائي (معنى الرمز ووحدته)",
+    text: String.raw`ماذا يمثل \(X\) في الصيغة \(\left(E=\dfrac{2kX}{y}\right)\) لسلك لانهائي وما هي وحدة قياسها؟`,
+    options: [
+      String.raw`كثافة الشحنة الخطية ، الوحدة \(\text{C/m}\)`,
+      String.raw`كثافة الشحنة السطحية ، الوحدة \(\text{C/m}^2\)`,
+      String.raw`كثافة الشحنة الحجمية ، الوحدة \(\text{C/m}^3\)`,
+      String.raw`كثافة الشحنة الحجمية ، الوحدة \(\text{C/m}^4\)`
+    ],
+    answer: 0,
+    explain: String.raw`مجال سلك لانهائي مشحون: \(E=\dfrac{2k\lambda}{y}\)، إذن \(X=\lambda\) هي كثافة الشحنة الخطية (شحنة لكل وحدة طول) ووحدتها \(\text{C/m}\).`
+  },
+  {
+    label: "2", img: null, tag: "حساب المجال الناتج عن سلك طويل مشحون",
+    text: String.raw`وُضع إجمالي \(1.45\times10^{6}\) من الإلكترونات الفائضة على سلك متعادل كهربائياً في البداية طوله \(1.13\,\text{m}\). ما مقدار المجال الكهربائي عند نقطة على مسافة عمودية \(0.401\,\text{m}\) من منتصف السلك؟ (تلميح: افترض أن الطول \(1.13\,\text{m}\) قريب بما يكفي من "الطول اللانهائي")`,
+    options: [
+      String.raw`\(9.21\times10^{-3}\,\text{N/C}\)`,
+      String.raw`\(2.92\times10^{-1}\,\text{N/C}\)`,
+      String.raw`\(6.77\times10^{1}\,\text{N/C}\)`,
+      String.raw`\(8.12\times10^{2}\,\text{N/C}\)`
+    ],
+    answer: 0,
+    explain: String.raw`\(\lambda=\dfrac{Ne}{L}=\dfrac{(1.45\times10^{6})(1.602\times10^{-19})}{1.13}=2.06\times10^{-13}\,\text{C/m}\). \(E=\dfrac{2k\lambda}{y}=\dfrac{2(8.99\times10^{9})(2.06\times10^{-13})}{0.401}=9.2\times10^{-3}\,\text{N/C}\).`
+  },
+  {
+    label: "3", img: null, tag: "نوع توزيع الشحنة وعدد الإلكترونات لكل وحدة طول",
+    text: String.raw`ينتج سلك مشحون ذو طول لانهائي مجالاً كهربائياً مقداره \(1.23\times10^{3}\,\text{N/C}\) على مسافة عمودية \(50.0\,\text{cm}\) من السلك، ويتجه المجال نحو السلك. (أ) ما توزيع الشحنة؟ (ب) كم عدد الإلكترونات لكل وحدة طول على السلك؟`,
+    options: [
+      String.raw`(أ) شحنة موجبة ، (ب) \(2.14\times10^{11}\) إلكترون/m`,
+      String.raw`(أ) شحنة سالبة ، (ب) \(4.27\times10^{11}\) إلكترون/m`,
+      String.raw`(أ) شحنة سالبة ، (ب) \(2.14\times10^{11}\) إلكترون/m`,
+      String.raw`(أ) شحنة سالبة ، (ب) \(1.07\times10^{11}\) إلكترون/m`
+    ],
+    answer: 2,
+    explain: String.raw`المجال يتجه نحو السلك إذن الشحنة سالبة. \(\lambda=\dfrac{Ey}{2k}=\dfrac{(1.23\times10^{3})(0.50)}{2(8.99\times10^{9})}=3.42\times10^{-8}\,\text{C/m}\)، وعدد الإلكترونات لكل متر \(=\dfrac{\lambda}{e}=\dfrac{3.42\times10^{-8}}{1.6\times10^{-19}}\approx2.14\times10^{11}\).`
+  },
+  {
+    label: "4", img: null, tag: "توزيع الشحنة على موصل كروي",
+    text: "افترض أن كرة فولاذية مصمتة وغير مشحونة، كإحدى الكرات الفولاذية المستخدمة في لعبة الكرة والدبابيس القديمة، موضوعة أو مستقرة على عازل مثالي. ثم وُضعت كمية صغيرة من الشحنة السالبة (مئات الإلكترونات مثلاً) عند القطب الشمالي للكرة. إذا أمكنك التحقق من توزيع الشحنة بعد ثوانٍ قليلة، فماذا ستكتشف؟",
+    options: [
+      "اختفت كل الشحنة المضافة وأصبحت الكرة متعادلة كهربائياً مرة أخرى",
+      "انتقلت كل الشحنة المضافة إلى مركز الكرة",
+      "وُزعت كل الشحنة المضافة بانتظام على سطح الكرة",
+      "لازالت الشحنة المضافة موجودة في مكانها عند القطب الشمالي للكرة أو قريبة جداً منه"
+    ],
+    answer: 2,
+    explain: "الفولاذ موصل، فتتنافر الإلكترونات المضافة وتتحرك بحرية حتى تستقر على السطح الخارجي، وبسبب تماثل الكرة تتوزع بانتظام على سطحها. الشحنة لا تختفي (قانون حفظ الشحنة) ولا تبقى داخل الموصل."
+  },
+  {
+    label: "5", img: null, tag: "توزيع الشحنة على عازل كروي",
+    text: "افترض أن كرة مجوفة غير مشحونة مصنوعة من عازل مثالي، ككرة البنج بونج، مستقرة على عازل مثالي. ثم وُضعت كمية صغيرة من الشحنة السالبة (مئات الإلكترونات مثلاً) عند القطب الشمالي للكرة. إذا أمكنك التحقق من توزيع الشحنة بعد ثوانٍ قليلة، فماذا ستكتشف؟",
+    options: [
+      "اختفت كل الشحنة المضافة وأصبحت الكرة متعادلة كهربائياً مرة أخرى",
+      "انتقلت كل الشحنة المضافة إلى مركز الكرة",
+      "وُزعت كل الشحنة المضافة بانتظام على سطح الكرة",
+      "لازالت الشحنة المضافة موجودة في مكانها عند القطب الشمالي للكرة أو قريبة جداً منه"
+    ],
+    answer: 3,
+    explain: "المادة عازلة، فالشحنات لا تستطيع الانتقال خلالها أو على سطحها بحرية، لذلك تبقى الشحنة المضافة في مكانها عند القطب الشمالي أو قريبة جداً منه (بخلاف الموصل الذي تتوزع فيه الشحنة)."
+  },
+  {
+    label: "6", img: null, tag: "الشحنة المحتثة على سطحي هيكل موصل",
+    text: String.raw`وُضعت شحنة \(+2q\) في مركز هيكل موصل غير مشحون. ما الشحنات التي ستكون موجودة على السطح الداخلي والخارجي للهيكل، على التوالي؟`,
+    options: [
+      String.raw`\(-2q\) ، \(+2q\)`,
+      String.raw`\(-q\) ، \(+q\)`,
+      String.raw`\(+2q\) ، \(-2q\)`,
+      String.raw`\(-2q\) ، \(+4q\)`
+    ],
+    answer: 0,
+    explain: String.raw`المجال داخل الموصل صفر، فيحتث السطح الداخلي شحنة \(-2q\) (تلغي مجال الشحنة المركزية داخل الموصل). والهيكل غير مشحون (صافي صفر) فيحمل السطح الخارجي \(+2q\).`
+  },
+  {
+    label: "7", img: "7", tag: "المجال الناتج عن لوحين لانهائيين غير موصلين",
+    text: String.raw`لوحان لانهائيان غير موصلين يوازي كل منهما الآخر وتفصل بينهما مسافة \(d=10\,\text{cm}\) كما هو موضح في الشكل. إذا كان كل لوح يحمل توزيع شحنة منتظماً مقداره \(\sigma=4.5\,\mu\text{C/m}^2\)، فما المجال الكهربائي عند النقطة \(P\) (إذا كان \(x_P=20\,\text{cm}\))؟`,
+    options: [
+      String.raw`\(2.54\,\hat{x}\ \text{N/C}\)`,
+      String.raw`\((-5.08\times10^{5})\,\hat{x}\ \text{N/C}\)`,
+      String.raw`\((5.08\times10^{5})\,\hat{x}\ \text{N/C}\)`,
+      String.raw`\((-1.02\times10^{5})\,\hat{x}\ \text{N/C}\)`
+    ],
+    answer: 2,
+    explain: String.raw`مجال لوح لانهائي غير موصل \(E=\dfrac{\sigma}{2\varepsilon_0}=\dfrac{4.5\times10^{-6}}{2(8.85\times10^{-12})}=2.54\times10^{5}\,\text{N/C}\). النقطة \(P\) على يمين اللوحين الموجبين، فمجال كل منهما في اتجاه \(+x\) ويتجمعان: \(E=2(2.54\times10^{5})=5.08\times10^{5}\,\hat{x}\,\text{N/C}\).`
+  },
+  {
+    label: "8", img: null, tag: "القوة على إلكترون قرب لوحين متقابلي الشحنة",
+    text: String.raw`لوحان متوازيان لانهائيان وغير موصلين تفصل بينهما مسافة \(10.0\,\text{cm}\) ولهما توزيعان للشحنة \(+1.00\,\mu\text{C/m}^2\) و \(-1.00\,\mu\text{C/m}^2\). ما القوة المؤثرة في إلكترون موجود في الفراغ بين اللوحين؟ وما القوة المؤثرة في إلكترون يقع خارج اللوحين بالقرب من سطح أحد اللوحين؟`,
+    options: [
+      String.raw`بين اللوحين: \(9.04\times10^{-15}\,\text{N}\) ، وخارجهما: صفر`,
+      String.raw`بين اللوحين: \(1.81\times10^{-14}\,\text{N}\) نحو اللوح الموجب ، وخارجهما: صفر`,
+      String.raw`بين اللوحين: \(1.81\times10^{-14}\,\text{N}\) نحو اللوح السالب ، وخارجهما: صفر`,
+      String.raw`بين اللوحين: \(1.81\times10^{-14}\,\text{N}\) نحو اللوح الموجب ، وخارجهما: \(9.04\times10^{-15}\,\text{N}\)`
+    ],
+    answer: 1,
+    explain: String.raw`بين اللوحين يتجمع مجالا اللوحين: \(E=\dfrac{\sigma}{2\varepsilon_0}+\dfrac{\sigma}{2\varepsilon_0}=\dfrac{\sigma}{\varepsilon_0}=\dfrac{1.00\times10^{-6}}{8.85\times10^{-12}}=1.13\times10^{5}\,\text{N/C}\)، والقوة على الإلكترون \(F=eE=1.81\times10^{-14}\,\text{N}\) نحو اللوح الموجب. خارج اللوحين يتعاكس المجالان ويتلاشيان، فالقوة صفر.`
+  },
+  {
+    label: "9", img: "9", tag: "المجال الكلي الناتج عن لوحين مختلفي الشحنة (مقدار واتجاه)",
+    text: String.raw`يبعد لوحا شحنة لانهائيان عن بعضهما مسافة \(10.0\,\text{cm}\) كما هو موضح في الشكل، وتوزيع الشحنة السطحي للوح 1 هو \(\sigma_1=3.00\,\mu\text{C/m}^2\) بينما للوح 2 هو \(\sigma_2=-5.00\,\mu\text{C/m}^2\). أوجد المجال الكهربائي الكلي (مقداراً واتجاهاً) عند: (أ) النقطة \(P\) على مسافة \(6.00\,\text{cm}\) يسار اللوح 1 ، (ب) النقطة \(P'\) على مسافة \(6.00\,\text{cm}\) يمين اللوح 1.`,
+    options: [
+      String.raw`(أ) \(1.13\times10^{5}\,\text{N/C}\) نحو اليسار ، (ب) \(4.52\times10^{5}\,\text{N/C}\) نحو اليمين`,
+      String.raw`(أ) \(2.26\times10^{5}\,\text{N/C}\) نحو اليمين ، (ب) \(1.13\times10^{5}\,\text{N/C}\) نحو اليمين`,
+      String.raw`(أ) \(1.13\times10^{5}\,\text{N/C}\) نحو اليمين ، (ب) \(4.52\times10^{5}\,\text{N/C}\) نحو اليمين`,
+      String.raw`(أ) \(4.52\times10^{5}\,\text{N/C}\) نحو اليسار ، (ب) \(1.13\times10^{5}\,\text{N/C}\) نحو اليسار`
+    ],
+    answer: 2,
+    explain: String.raw`\(E_1=\dfrac{\sigma_1}{2\varepsilon_0}=1.69\times10^{5}\,\text{N/C}\) (يبتعد عن اللوح 1 الموجب)، \(E_2=\dfrac{|\sigma_2|}{2\varepsilon_0}=2.82\times10^{5}\,\text{N/C}\) (يتجه نحو اللوح 2 السالب). عند \(P\) (يسار اللوحين): \(E_1\) نحو اليسار و \(E_2\) نحو اليمين، فالمحصلة \(=2.82-1.69=1.13\times10^{5}\) نحو اليمين. عند \(P'\) (بين اللوحين): كلاهما نحو اليمين، فالمحصلة \(=1.69+2.82=4.52\times10^{5}\,\text{N/C}\) نحو اليمين.`
+  },
+  {
+    label: "10", img: "10", tag: "مقارنة المجال بين لوحين وخارجهما",
+    text: "يوضح الشكل لوحان عازلان قريبان من بعضهما. رتب النقاط 1 و 2 و 3 من الأكبر إلى الأقل حسب المجال الكهربائي.",
+    options: [
+      String.raw`\(1\gt2\gt3\)`,
+      String.raw`\(3\gt1\gt2\)`,
+      String.raw`\(3=2\gt1\)`,
+      String.raw`\(1=2=3\)`
+    ],
+    answer: 2,
+    explain: "اللوحان متقابلا الشحنة وقريبان من بعضهما، فالمجال بينهما منتظم وقوي (النقطتان 2 و 3 بين اللوحين فمجالهما متساو)، أما خارج اللوحين (النقطة 1) فيتعاكس مجالا اللوحين ويكادان يتلاشيان. إذن الترتيب: 3 = 2 > 1."
+  },
+  {
+    label: "11", img: "11", tag: "المجال خارج لوحين متوازيين متماثلي الشحنة",
+    text: String.raw`في الشكل المجاور وُضع في الهواء لوحان رقيقان متوازيان لانهائيان وغير موصلين تفصل بينهما مسافة \(d\) ويحمل كلاً منهما شحنة موجبة منتظمة التوزيع كثافتها \(\sigma\). ما مقدار المجال الكهربائي عند النقطة \(a\)؟`,
+    options: [
+      String.raw`\(\dfrac{2\sigma}{\varepsilon_0}\)`,
+      String.raw`\(\dfrac{\sigma}{\varepsilon_0}\)`,
+      String.raw`\(\dfrac{\sigma}{2\varepsilon_0}\)`,
+      String.raw`\(\dfrac{3\sigma}{\varepsilon_0}\)`
+    ],
+    answer: 1,
+    explain: String.raw`مجال كل لوح غير موصل \(\dfrac{\sigma}{2\varepsilon_0}\) ولا يعتمد على المسافة. النقطة \(a\) خارج اللوحين (على الجهة نفسها منهما) فيتجمع المجالان: \(E=\dfrac{\sigma}{2\varepsilon_0}+\dfrac{\sigma}{2\varepsilon_0}=\dfrac{\sigma}{\varepsilon_0}\).`
+  },
+  {
+    label: "12", img: null, tag: "الشحنة على السطح الداخلي لموصل مجوف",
+    text: String.raw`أي من العبارات التالية صحيحة؟
+      <div class="stmts">
+        <div><b>(1)</b> لن يكون هناك أي تغير في الشحنة الموجودة على السطح الداخلي لكرة موصلة مجوفة إذا وُضعت شحنة أخرى على السطح الخارجي.</div>
+        <div><b>(2)</b> سيكون هناك بعض التغير في الشحنة الموجودة على السطح الداخلي لكرة موصلة مجوفة إذا وُضعت شحنة أخرى على السطح الخارجي.</div>
+        <div><b>(3)</b> لن يكون هناك أي تغير في الشحنة الموجودة على السطح الداخلي لكرة موصلة مجوفة إذا وُضعت شحنة أخرى في مركز الكرة.</div>
+        <div><b>(4)</b> سيكون هناك بعض التغير في الشحنة الموجودة على السطح الداخلي لكرة موصلة مجوفة إذا وُضعت شحنة أخرى في مركز الكرة.</div>
+      </div>`,
+    options: [
+      "العبارتان (1) و (3)",
+      "العبارتان (2) و (3)",
+      "العبارتان (1) و (4)",
+      "العبارتان (2) و (4)"
+    ],
+    answer: 2,
+    explain: "الشحنة على السطح الداخلي تساوي دائماً عكس الشحنة الموجودة داخل التجويف فقط (قانون جاوس مع المجال صفر داخل الموصل). إضافة شحنة على السطح الخارجي لا تغيرها، فالعبارة (1) صحيحة و (2) خاطئة. أما إضافة شحنة في مركز التجويف فتغيرها، فالعبارة (4) صحيحة و (3) خاطئة."
+  },
+  {
+    label: "13", img: null, tag: "الشحنات على سطحي موصل كروي مجوف",
+    text: String.raw`افترض أن موصلاً كروياً مجوفاً شحنته الكلية \(+5e\)، ونصفا القطر الخارجي والداخلي هما \(a\) و \(b\) على التوالي. (أ) احسب الشحنة على السطحين الداخلي والخارجي للكرة إذا وُضعت شحنة \(-3e\) في مركز الكرة. (ب) ما الشحنة الصافية الكلية للكرة؟`,
+    options: [
+      String.raw`(أ) داخلي \(-3e\) وخارجي \(+8e\) ، (ب) \(+5e\)`,
+      String.raw`(أ) داخلي \(+3e\) وخارجي \(+2e\) ، (ب) \(+5e\)`,
+      String.raw`(أ) داخلي \(+3e\) وخارجي \(+5e\) ، (ب) \(+8e\)`,
+      String.raw`(أ) داخلي \(-3e\) وخارجي \(+2e\) ، (ب) \(-1e\)`
+    ],
+    answer: 1,
+    explain: String.raw`الشحنة \(-3e\) في المركز تحتث \(+3e\) على السطح الداخلي. الشحنة الكلية للموصل \(+5e\)، فالسطح الخارجي يحمل \(5e-3e=+2e\). والشحنة الصافية الكلية للكرة (الموصل) هي \(+3e+2e=+5e\).`
+  },
+  {
+    label: "14", img: "14", tag: "الشحنة على سطحي هيكل كروي موصل من المجال",
+    text: String.raw`هيكل كروي مجوف وموصل نصف قطره الداخلي \(8.00\,\text{cm}\) ونصف قطره الخارجي \(10.0\,\text{cm}\). ومقدار المجال الكهربائي عند السطح الداخلي للهيكل \(E_i\) هو \(80.0\,\text{N/C}\) ويتجه نحو مركز الكرة، ومقدار المجال الكهربائي عند السطح الخارجي \(E_o=80.0\,\text{N/C}\) ويتجه بعيداً عن مركز الكرة (انظر الشكل). أوجد مقدار الشحنة على السطح الداخلي وعلى السطح الخارجي للهيكل الكروي.`,
+    options: [
+      String.raw`داخلي \(8.9\times10^{-11}\,\text{C}\) ، خارجي \(5.7\times10^{-11}\,\text{C}\)`,
+      String.raw`داخلي \(5.7\times10^{-11}\,\text{C}\) ، خارجي \(3.2\times10^{-11}\,\text{C}\)`,
+      String.raw`داخلي \(3.2\times10^{-11}\,\text{C}\) ، خارجي \(8.9\times10^{-11}\,\text{C}\)`,
+      String.raw`داخلي \(5.7\times10^{-11}\,\text{C}\) ، خارجي \(8.9\times10^{-11}\,\text{C}\)`
+    ],
+    answer: 3,
+    explain: String.raw`قانون جاوس عند السطح الداخلي (\(r=0.080\,\text{m}\)): \(E_i=\dfrac{k|q_{enc}|}{r^2}\Rightarrow|q_{enc}|=\dfrac{(80)(0.080)^2}{8.99\times10^{9}}=5.7\times10^{-11}\,\text{C}\)؛ المجال نحو المركز فالشحنة المحصورة سالبة، ويحمل السطح الداخلي شحنة مقدارها \(5.7\times10^{-11}\,\text{C}\) (موجبة). عند السطح الخارجي (\(r=0.100\,\text{m}\)): الشحنة الكلية المحصورة \(=\dfrac{(80)(0.100)^2}{8.99\times10^{9}}=8.9\times10^{-11}\,\text{C}\) موجبة، وهي شحنة السطح الخارجي (لأن الشحنة المركزية والسطح الداخلي يلغي كل منهما الآخر).`
+  },
+  {
+    label: "15", img: null, tag: "المجال داخل كرة عازلة منتظمة الشحنة",
+    text: String.raw`افترض أن كرة غير موصلة ولها كثافة شحنة منتظمة \(\rho=3.57\times10^{-6}\,\text{C/m}^3\) ونصف قطرها \(R=1.72\,\text{m}\). ما مقدار المجال الكهربائي على مسافة \(0.530\,\text{m}\) من مركز الكرة؟`,
+    options: [
+      String.raw`\(2.14\times10^{5}\,\text{N/C}\)`,
+      String.raw`\(7.13\times10^{4}\,\text{N/C}\)`,
+      String.raw`\(2.44\times10^{6}\,\text{N/C}\)`,
+      String.raw`\(2.38\times10^{4}\,\text{N/C}\)`
+    ],
+    answer: 1,
+    explain: String.raw`النقطة داخل الكرة (\(r<R\))، والشحنة المحصورة \(q_{enc}=\rho\cdot\tfrac43\pi r^3\). من قانون جاوس: \(E=\dfrac{\rho r}{3\varepsilon_0}=\dfrac{(3.57\times10^{-6})(0.530)}{3(8.85\times10^{-12})}=7.13\times10^{4}\,\text{N/C}\).`
+  },
+  {
+    label: "16", img: null, tag: "المجال حول شحنة مركزية داخل هيكل كروي موصل",
+    text: String.raw`وُضعت شحنة نقطية مقدارها \(-6.00\,\text{nC}\) في مركز هيكل كروي موصل. وللهيكل نصف قطر داخلي \(2.00\,\text{m}\) ونصف قطر خارجي \(4.00\,\text{m}\) وشحنته \(+7.00\,\text{nC}\). (أ) ما المجال الكهربائي عند \(r=1.00\,\text{m}\)؟ (ب) عند \(r=3.00\,\text{m}\)؟ (ج) عند \(r=5.00\,\text{m}\)؟ (د) ما توزيع الشحنة \(\sigma\) على السطح الخارجي للهيكل؟`,
+    options: [
+      String.raw`(أ) \(53.9\,\text{N/C}\) نحو المركز ، (ب) صفر ، (ج) \(2.52\,\text{N/C}\) للخارج ، (د) \(3.48\times10^{-11}\,\text{C/m}^2\)`,
+      String.raw`(أ) \(53.9\,\text{N/C}\) للخارج ، (ب) صفر ، (ج) \(0.360\,\text{N/C}\) نحو المركز ، (د) \(4.97\times10^{-12}\,\text{C/m}^2\)`,
+      String.raw`(أ) \(53.9\,\text{N/C}\) نحو المركز ، (ب) صفر ، (ج) \(0.360\,\text{N/C}\) للخارج ، (د) \(4.97\times10^{-12}\,\text{C/m}^2\)`,
+      String.raw`(أ) \(53.9\,\text{N/C}\) نحو المركز ، (ب) \(5.99\,\text{N/C}\) نحو المركز ، (ج) \(0.360\,\text{N/C}\) للخارج ، (د) \(4.97\times10^{-12}\,\text{C/m}^2\)`
+    ],
+    answer: 2,
+    explain: String.raw`(أ) داخل التجويف تؤثر الشحنة المركزية فقط: \(E=\dfrac{k|q|}{r^2}=\dfrac{(8.99\times10^{9})(6\times10^{-9})}{1^2}=53.9\,\text{N/C}\) نحو المركز (شحنة سالبة). (ب) \(r=3\,\text{m}\) داخل مادة الموصل فالمجال صفر. (ج) الشحنة الكلية \(=-6+7=+1\,\text{nC}\): \(E=\dfrac{k(1\times10^{-9})}{5^2}=0.360\,\text{N/C}\) للخارج. (د) السطح الداخلي \(+6\,\text{nC}\) والخارجي \(7-6=+1\,\text{nC}\): \(\sigma=\dfrac{1\times10^{-9}}{4\pi(4.00)^2}=4.97\times10^{-12}\,\text{C/m}^2\).`
+  },
+  {
+    label: "17", img: "17", tag: "الشحنة على أسطح كرة مصمتة داخل كرة مجوفة",
+    text: String.raw`كرة فلزية مجوفة نصف قطرها الداخلي \(20.0\,\text{cm}\) ونصف قطرها الخارجي \(30.0\,\text{cm}\)، وكما يوضح الشكل وُضعت كرة فلزية مصمتة نصف قطرها \(10.0\,\text{cm}\) في مركز الكرة المجوفة. فوُجد أن المجال الكهربائي عند نقطة \(P\) على مسافة \(15.0\,\text{cm}\) من المركز هو \(E_1=1.00\times10^{4}\,\text{N/C}\) ويتجه شعاعياً إلى الداخل. وعند النقطة \(Q\) على مسافة \(35.0\,\text{cm}\) من المركز وُجد أن المجال الكهربائي هو \(E_2=1.00\times10^{4}\,\text{N/C}\) ويتجه شعاعياً إلى الخارج. أوجد الشحنة الكلية على: (أ) سطح الكرة الداخلية ، (ب) السطح الداخلي للكرة المجوفة ، (ج) السطح الخارجي للكرة المجوفة.`,
+    options: [
+      String.raw`(أ) \(+25.0\,\text{nC}\) ، (ب) \(-25.0\,\text{nC}\) ، (ج) \(+136\,\text{nC}\)`,
+      String.raw`(أ) \(-25.0\,\text{nC}\) ، (ب) \(+25.0\,\text{nC}\) ، (ج) \(+161\,\text{nC}\)`,
+      String.raw`(أ) \(-25.0\,\text{nC}\) ، (ب) \(-25.0\,\text{nC}\) ، (ج) \(+136\,\text{nC}\)`,
+      String.raw`(أ) \(-25.0\,\text{nC}\) ، (ب) \(+25.0\,\text{nC}\) ، (ج) \(+136\,\text{nC}\)`
+    ],
+    answer: 3,
+    explain: String.raw`عند \(P\) (\(r=0.15\,\text{m}\)) المجال نحو الداخل، فالشحنة المحصورة سالبة: \(q=-\dfrac{Er^2}{k}=-\dfrac{(1.00\times10^{4})(0.15)^2}{8.99\times10^{9}}=-25.0\,\text{nC}\) وهي شحنة الكرة الداخلية. السطح الداخلي للكرة المجوفة يحمل عكسها \(+25.0\,\text{nC}\). عند \(Q\) (\(r=0.35\,\text{m}\)) الشحنة الكلية المحصورة \(=\dfrac{(1.00\times10^{4})(0.35)^2}{8.99\times10^{9}}=+136\,\text{nC}\)، والكرة الداخلية مع السطح الداخلي مجموعهما صفر، فالسطح الخارجي يحمل \(+136\,\text{nC}\).`
+  },
+  {
+    label: "18", img: null, tag: "المجال لكرة مشحونة حجمياً داخل هيكل موصل",
+    text: String.raw`التوزيع الحجمي للشحنات في كرة نصف قطرها \(12.0\,\text{cm}\) ومتمركزة عند نقطة الأصل هو \(120\,\text{nC/cm}^3\). وتتمركز الكرة داخل هيكل كروي موصل نصف قطره الداخلي \(30.0\,\text{cm}\) ونصف قطره الخارجي \(50.0\,\text{cm}\)، ومقدار الشحنة على الهيكل الكروي هو \(-2.00\,\text{mC}\). ما مقدار المجال الكهربائي واتجاهه عند كل مسافة من نقطة الأصل: (أ) \(r=10.0\,\text{cm}\) ، (ب) \(r=20.0\,\text{cm}\) ، (ج) \(r=40.0\,\text{cm}\) ، (د) \(r=80.0\,\text{cm}\)؟`,
+    options: [
+      String.raw`(أ) \(4.52\times10^{8}\,\text{N/C}\) للخارج ، (ب) \(1.95\times10^{8}\,\text{N/C}\) للخارج ، (ج) صفر ، (د) \(1.59\times10^{7}\,\text{N/C}\) للخارج`,
+      String.raw`(أ) \(4.52\times10^{8}\,\text{N/C}\) للخارج ، (ب) \(1.95\times10^{8}\,\text{N/C}\) للخارج ، (ج) صفر ، (د) \(1.59\times10^{7}\,\text{N/C}\) نحو الأصل`,
+      String.raw`(أ) \(1.51\times10^{8}\,\text{N/C}\) للخارج ، (ب) \(1.95\times10^{8}\,\text{N/C}\) للخارج ، (ج) صفر ، (د) \(1.59\times10^{7}\,\text{N/C}\) نحو الأصل`,
+      String.raw`(أ) \(4.52\times10^{8}\,\text{N/C}\) للخارج ، (ب) \(1.95\times10^{8}\,\text{N/C}\) للخارج ، (ج) صفر ، (د) \(2.81\times10^{7}\,\text{N/C}\) نحو الأصل`
+    ],
+    answer: 1,
+    explain: String.raw`\(\rho=120\,\text{nC/cm}^3=0.120\,\text{C/m}^3\)، والشحنة الكلية للكرة \(Q=\rho\cdot\tfrac43\pi(0.12)^3=8.69\times10^{-4}\,\text{C}\). (أ) داخل الكرة: \(E=\dfrac{\rho r}{3\varepsilon_0}=\dfrac{(0.120)(0.10)}{3(8.85\times10^{-12})}=4.52\times10^{8}\,\text{N/C}\) للخارج. (ب) خارج الكرة داخل التجويف: \(E=\dfrac{kQ}{r^2}=\dfrac{(8.99\times10^{9})(8.69\times10^{-4})}{(0.20)^2}=1.95\times10^{8}\,\text{N/C}\) للخارج. (ج) داخل مادة الموصل: صفر. (د) الشحنة الكلية \(=8.69\times10^{-4}-2.00\times10^{-3}=-1.13\times10^{-3}\,\text{C}\): \(E=\dfrac{k|Q_{tot}|}{r^2}=\dfrac{(8.99\times10^{9})(1.13\times10^{-3})}{(0.80)^2}=1.59\times10^{7}\,\text{N/C}\) نحو الأصل.`
+  }
+];
+
+/* =====================================================================
+   أدوات مساعدة
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const LETTERS = ["أ", "ب", "ج", "د", "هـ", "و"];
+
+let studentId = "";
+let studentName = "";
+let startTime = 0;
+let timerHandle = null;
+let examActive = false;
+let submitted = false;
+let lastPayload = null;
+
+$("meta-line").textContent = `${EXAM_META.subject} • ${EXAM_META.module} • ${EXAM_META.lesson}`;
+
+function typeset(nodes) {
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise(nodes).catch(() => {});
+  } else {
+    // MathJax لم يُحمَّل بعد: ننتظر انتهاء التحميل
+    window.addEventListener("load", () => {
+      if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(nodes).catch(() => {});
+    }, { once: true });
+  }
+}
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60), r = s % 60;
+  return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0");
+}
+
+/* =====================================================================
+   تسجيل الدخول (GET)
+   ===================================================================== */
+async function login() {
+  const errEl = $("login-error");
+  const btn = $("login-btn");
+  const id = $("student-id").value.trim();
+  errEl.textContent = "";
+
+  if (!id) { errEl.textContent = "من فضلك أدخل كود الطالب."; return; }
+
+  btn.disabled = true;
+  const oldText = btn.textContent;
+  btn.textContent = "جارٍ التحقق...";
+
+  try {
+    const res = await fetch(`${SCRIPT_URL}?student_id=${encodeURIComponent(id)}`, { method: "GET", redirect: "follow" });
+    const data = await res.json();
+
+    if (data && data.valid === true) {
+      studentId = id;
+      studentName = data.student_name || "";
+      startExam();
+    } else {
+      errEl.textContent = (data && data.error) ? data.error : "الكود غير مسجل في قاعدة البيانات.";
+    }
+  } catch (e) {
+    errEl.textContent = "تعذر الاتصال بالخادم. تأكد من الإنترنت وحاول مرة أخرى.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+
+/* =====================================================================
+   تحميل الصور (يجرّب الامتدادات تلقائياً)
+   ===================================================================== */
+function tryLoadImage(name, alt, onOk, onFail) {
+  let i = 0;
+  const img = new Image();
+  img.alt = alt;
+  img.onload = () => onOk(img);
+  img.onerror = () => {
+    i++;
+    if (i < IMG_EXTS.length) img.src = `${IMG_DIR}/${name}.${IMG_EXTS[i]}`;
+    else if (onFail) onFail();
+  };
+  img.src = `${IMG_DIR}/${name}.${IMG_EXTS[0]}`;
+}
+
+function loadMainImage(wrap, name) {
+  tryLoadImage(name, `شكل السؤال ${name}`, (img) => {
+    img.addEventListener("click", () => openLightbox(img.src));
+    wrap.appendChild(img);
+    wrap.classList.remove("hidden");
+  });
+  /* لا توجد صورة لهذا السؤال: يبقى الحاوي مخفياً */
+}
+
+function loadOptionImage(holder, name, letter) {
+  tryLoadImage(name, `الشكل (${letter})`, (img) => {
+    holder.textContent = "";
+    holder.appendChild(img);
+  }, () => {
+    holder.innerHTML = `<span class="missing">الشكل (${letter}) — الصورة غير موجودة: ${IMG_DIR}/${name}</span>`;
+  });
+}
+
+/* =====================================================================
+   عرض الامتحان
+   ===================================================================== */
+function buildQuestions() {
+  const root = $("questions");
+  root.innerHTML = "";
+
+  QUESTIONS.forEach((q, idx) => {
+    const card = document.createElement("article");
+    card.className = "card q-card";
+    card.dataset.index = idx;
+    card.dataset.tag = q.tag;
+
+    const hasOptImgs = Array.isArray(q.optImgs) && q.optImgs.length > 0;
+
+    const opts = q.options.map((o, i) => `
+      <label class="opt" data-i="${i}">
+        <input type="radio" name="q${idx}" value="${i}">
+        <span class="letter">${LETTERS[i]}</span>
+        <span class="otext${hasOptImgs ? " optimg" : ""}">${o}</span>
+      </label>`).join("");
+
+    card.innerHTML = `
+      <div class="q-head"><span class="q-num">السؤال ${q.label}</span></div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-img-wrap hidden"></div>
+      <div class="options${hasOptImgs ? " grid-img" : ""}">${opts}</div>
+      <div class="feedback hidden"></div>`;
+
+    root.appendChild(card);
+
+    if (q.img) loadMainImage(card.querySelector(".q-img-wrap"), q.img);
+    if (hasOptImgs) {
+      card.querySelectorAll(".optimg").forEach((holder, i) => {
+        loadOptionImage(holder, q.optImgs[i], LETTERS[i]);
+      });
+    }
+  });
+
+  root.addEventListener("change", updateProgress);
+  typeset([root]);
+}
+
+function updateProgress() {
+  let answered = 0;
+  QUESTIONS.forEach((_, idx) => {
+    if (document.querySelector(`input[name="q${idx}"]:checked`)) answered++;
+  });
+  $("progress-bar").style.width = (answered / QUESTIONS.length * 100) + "%";
+  if (!submitted) $("submit-msg").textContent = `تمت الإجابة على ${answered} من ${QUESTIONS.length}`;
+}
+
+function startExam() {
+  $("login-section").classList.add("hidden");
+  $("exam-section").classList.remove("hidden");
+  $("welcome").textContent = `مرحباً بك: ${studentName}`;
+
+  buildQuestions();
+  updateProgress();
+
+  examActive = true;
+  startTime = Date.now();
+  timerHandle = setInterval(() => {
+    $("timer").textContent = fmtTime(Math.floor((Date.now() - startTime) / 1000));
+  }, 1000);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* =====================================================================
+   التصحيح والإرسال (POST)
+   ===================================================================== */
+/* نص الخيار كما يُسجَّل في الشيت (بدون وسوم HTML أو علامات MathJax) */
+function plain(html, q, i) {
+  if (Array.isArray(q.optImgs) && q.optImgs.length) return `الشكل (${LETTERS[i]}) - ${q.optImgs[i]}`;
+  return String(html)
+    .replace(/<[^>]*>/g, "")
+    .replace(/\\\(|\\\)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function gradeExam() {
+  let score = 0;
+  const weaknesses = new Set();
+  const details = [];
+
+  QUESTIONS.forEach((q, idx) => {
+    const card = document.querySelector(`.q-card[data-index="${idx}"]`);
+    const checked = card.querySelector(`input[name="q${idx}"]:checked`);
+    const selected = checked ? parseInt(checked.value, 10) : -1;
+    const isCorrect = selected === q.answer;
+    if (isCorrect) score++; else weaknesses.add(q.tag);
+
+    details.push({
+      question: q.label,
+      selected: selected >= 0 ? LETTERS[selected] : null,
+      selectedText: selected >= 0 ? plain(q.options[selected], q, selected) : "",
+      correct: LETTERS[q.answer],
+      correctText: plain(q.options[q.answer], q, q.answer),
+      isCorrect,
+      tag: q.tag
+    });
+  });
+
+  return { score, weaknesses: [...weaknesses], details };
+}
+
+function showFeedback() {
+  QUESTIONS.forEach((q, idx) => {
+    const card = document.querySelector(`.q-card[data-index="${idx}"]`);
+    card.classList.add("locked");
+    card.querySelectorAll("input").forEach((i) => (i.disabled = true));
+
+    const checked = card.querySelector(`input[name="q${idx}"]:checked`);
+    const selected = checked ? parseInt(checked.value, 10) : -1;
+    const ok = selected === q.answer;
+
+    card.querySelectorAll(".opt").forEach((el) => {
+      const i = parseInt(el.dataset.i, 10);
+      if (i === q.answer) el.classList.add("correct");
+      else if (i === selected) el.classList.add("wrong");
+    });
+
+    const fb = card.querySelector(".feedback");
+    fb.classList.remove("hidden", "ok", "bad");
+    fb.classList.add(ok ? "ok" : "bad");
+    const title = ok
+      ? "✅ إجابة صحيحة"
+      : (selected === -1
+          ? `❌ لم تجب على هذا السؤال — الإجابة الصحيحة: ${LETTERS[q.answer]}`
+          : `❌ إجابة خاطئة — الإجابة الصحيحة: ${LETTERS[q.answer]}`);
+    fb.innerHTML = `<div class="fb-title">${title}</div><div class="fb-explain">${q.explain}</div>`;
+  });
+  typeset([$("questions")]);
+}
+
+function showBanner(score, total, timeSeconds) {
+  const pct = Math.round((score / total) * 100);
+  const banner = $("result-banner");
+  banner.classList.remove("hidden");
+  banner.innerHTML = `
+    <div class="label">نتيجتك يا ${studentName}</div>
+    <div class="score">${score} / ${total}</div>
+    <div class="pct">${pct}% • الوقت: ${fmtTime(timeSeconds)}</div>
+    <div id="sync-status">جارٍ حفظ النتيجة...</div>
+    <div><button id="retry-btn" class="btn hidden">إعادة محاولة الحفظ</button></div>`;
+  $("retry-btn").addEventListener("click", () => sendResult(lastPayload));
+}
+
+function setSync(msg) { const el = $("sync-status"); if (el) el.textContent = msg; }
+
+async function sendResult(payload) {
+  const retry = $("retry-btn");
+  if (retry) retry.classList.add("hidden");
+  setSync("جارٍ حفظ النتيجة...");
+
+  const body = JSON.stringify(payload);
+  try {
+    /* text/plain يتجنب طلب preflight مع Google Apps Script */
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body,
+      redirect: "follow"
+    });
+    let data = null;
+    try { data = await res.json(); } catch (_) { /* قد لا يكون الرد JSON */ }
+
+    if (res.ok && !(data && (data.error || data.success === false))) {
+      setSync("✅ تم حفظ نتيجتك بنجاح");
+    } else {
+      setSync("⚠️ تعذر حفظ النتيجة: " + ((data && data.error) || "خطأ في الخادم"));
+      if (retry) retry.classList.remove("hidden");
+    }
+  } catch (e) {
+    /* احتمال حجب CORS: نعيد الإرسال بوضع no-cors (لا يمكن قراءة الرد) */
+    try {
+      await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body
+      });
+      setSync("✅ تم إرسال نتيجتك");
+    } catch (e2) {
+      setSync("⚠️ تعذر الاتصال بالخادم، لم يتم حفظ النتيجة");
+      if (retry) retry.classList.remove("hidden");
+    }
+  }
+}
+
+async function submitExam() {
+  if (submitted) return;
+
+  let unanswered = 0;
+  QUESTIONS.forEach((_, idx) => {
+    if (!document.querySelector(`input[name="q${idx}"]:checked`)) unanswered++;
+  });
+  if (unanswered > 0 &&
+      !confirm(`لم تجب على ${unanswered} سؤال/أسئلة. هل تريد إنهاء الامتحان وإرسال النتيجة؟`)) return;
+
+  const btn = $("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "جارٍ التصحيح والإرسال...";
+
+  submitted = true;
+  examActive = false;
+  clearInterval(timerHandle);
+  const timeSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+  const { score, weaknesses, details } = gradeExam();
+  const total = QUESTIONS.length;
+
+  showFeedback();
+  showBanner(score, total, timeSeconds);
+  $("submit-msg").textContent = "";
+  btn.classList.add("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  lastPayload = {
+    studentId: String(studentId),
+    subject: EXAM_META.subject,
+    module: EXAM_META.module,
+    lesson: EXAM_META.lesson,
+    assessmentType: EXAM_META.type,
+    score,
+    total,
+    timeSeconds,
+    weaknesses,
+    details
+  };
+  await sendResult(lastPayload);
+}
+
+/* =====================================================================
+   تكبير الصور
+   ===================================================================== */
+function openLightbox(src) {
+  const lb = $("lightbox");
+  lb.querySelector("img").src = src;
+  lb.classList.add("open");
+  lb.setAttribute("aria-hidden", "false");
+}
+$("lightbox").addEventListener("click", () => {
+  $("lightbox").classList.remove("open");
+  $("lightbox").setAttribute("aria-hidden", "true");
+});
+
+/* =====================================================================
+   ربط الأحداث
+   ===================================================================== */
+$("login-btn").addEventListener("click", login);
+$("student-id").addEventListener("keydown", (e) => { if (e.key === "Enter") login(); });
+$("submit-btn").addEventListener("click", submitExam);
+
+window.addEventListener("beforeunload", (e) => {
+  if (examActive && !submitted) { e.preventDefault(); e.returnValue = ""; }
+});
+</script>
+</body>
+</html>
